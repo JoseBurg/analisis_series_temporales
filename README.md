@@ -6,3 +6,5 @@ Modulos:
 
   En este modulo podrán desarrollar la destreza de poner limpiar una base de datos y analizar de manera exahutiva,
   ademas de transformar y descomponer datos de series de temporal.
+
+![image](https://github.com/JoseBurg/analisis_series_temporales/assets/65372353/2fd7a418-c39f-489a-a0cb-6d1a2ac1228d)
