@@ -4,5 +4,5 @@ Curso de *Análisis de series temporales y políticas monetarias en R* auspiciad
 Modulos:
 + **Análisis de exploratorio y componentes de una serie temporal**
 
-  En este curso podrán desarrollar la destreza de poner limpiar una base de datos y analizar de manera exahutiva una base de datos,
+  En este modulo podrán desarrollar la destreza de poner limpiar una base de datos y analizar de manera exahutiva una base de datos,
   ademas de transformar y descomponer datos de series de temporal.
