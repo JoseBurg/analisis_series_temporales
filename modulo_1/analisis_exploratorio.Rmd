@@ -192,8 +192,7 @@ La observación en una serie de tiempo se compone de elementos estacionales y de
     1. Aditivo (más común)
     
     2. Multiplicativo (cuando la variabilidad de la serie aumenta con el tiempo)
-    
-\end{block}
+\end{block} 
 ```
 ## Referencias
 
