@@ -1,21 +1,26 @@
 ---
-title: "Analisis exploratorio y componentes de una serie temporal"
-author: "José Burgos"
-date: "2024-02-24"
+title: "Analisis exploratorio"
+subtitle: "Series de tiempo y sus componentes"
+author:
+  - "UASD"
+  - "ASOECO"
+
+date: "Econ. José Burgos"
 output:
   beamer_presentation:
-    theme: "CambridgeUS"
+    theme: "Boadilla"
     colortheme: "whale"
     fonttheme: "professionalfonts"
     slide_level: 2
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.align = 'center', fig.width = 3, fig.height = 2 )
 
 library(readxl)
 library(tidyverse)
 library(ggthemes)
+library(fpp3)
 # Cargar datos
 imae <- read_excel("../Recursos/datos/imae_ready.xlsx") |> 
   mutate(fecha = as.Date(fecha))
@@ -23,42 +28,109 @@ imae <- read_excel("../Recursos/datos/imae_ready.xlsx") |>
 
 ## Series de tiempo
 
-\textcolor{red}{Este es un subtítulo en rojo.}
+Los datos de series de tiempo consisten en observaciones de una variable o varias variables a lo largo del tiempo, y se caracteriza principalmente por tener un orden temporal. (Wooldridge, 2010)
 
-Los datos de series de tiempo consisten en observaciones de una variable o varias variables a lo largo del tiempo. (wooldridge, 2010)
+```{=tex}
+\begin{equation}
+     X_t, t = 1,2,...T\label{eq:series_tiempo}
+\end{equation}
+```
+Donde: $X_t$ = *Variable de interés en el periodo* $t$
 
-### Caracteristicas de datos de series de tiempo
+T = *Número de observaciones*
 
--   Frecuencia o periodicidad
--   Estacionalidad
--   Tendencia
--   Ciclos
--   Ruido
+## Series de tiempo
+
+\textcolor{blue}{Ejemplos:}
+
+-   Tasas de interés mensuales.
+
+-   Tipo de cambio.
+
+-   Los indices económicos registrados durante una periodicidad dada:
+
+    -   PIB (*Trimestral*).
+
+    -   Inflación (*Mensual*).
+
+    -   Desempleo (*trimestral*).
+
+## Series de tiempo
+
+Ejemplos
+
+**Índice Mensual de Actividad Económica (IMAE) año 2023**
+
+*República Dominicana*
+
++------------+------+
+| Fecha      | IMAE |
++:==========:+:====:+
+| .          | .    |
+|            |      |
+| .          | .    |
+|            |      |
+| .          | .    |
++------------+------+
+| Septiembre | 196  |
++------------+------+
+| Octubre    | 207  |
++------------+------+
+| Noviembre  | 220  |
++------------+------+
+| Diciembre  | 230  |
++------------+------+
+
+*Fuente: BCRD*
 
 ## Frecuencia o periodicidad
 
 Frecuencia son la cantidad de veces que se toman las observaciones en un periodo de tiempo. Por ejemplo, el PIB se mide de forma anual, trimestral o mensual.
 
--   Anual (*PIB, inflación*)
--   Trimestral (*PIB*)
--   Mensual (*IMAE*)
--   Semanal (*Precios de acciones*)
--   Diaria (*Tipo de cambio*)
+-   Anual (*PIB, inflación*).
+-   Trimestral (*PIB*).
+-   Mensual (*IMAE*).
+-   Semanal (*Precios de acciones*).
+-   Diaria (*Tipo de cambio*).
+
+## Características de datos de series de tiempo
+
+Las series de tiempo presentan 4 elementos esenciales en su composición.
+
+### Componentes:
+
+-   Estacionalidad $m_t$
+
+-   Tendencia $s_t$
+
+-   Aleatoriedad $\epsilon_t$
+
+-   Observación $x_t$
 
 ## Estacionalidad
 
-La estacionalidad son los patrones que se repiten en un periodo de tiempo fijo. Por ejemplo, el consumo de energía eléctrica es mayor en verano que en invierno.
+Son los movimientos que una serie de tiempo presenta en determinados periodos de la misma, la cual se presenta con un patrón de fluctuaciones. *Ejemplo: el consumo de energía eléctrica es mayor en verano que en invierno.*
 
-```{r, fig.align='center', fig.width=6, fig.height=3}
-imae |> 
+```{r}
+plot_imae <- imae |> 
   mutate(fecha = as.Date(fecha)) |> 
-  filter(fecha >= "2010-01-01" & fecha <= "2020-01-01") |> 
-  ggplot(aes(x = fecha, y = indice_original)) + 
-  geom_line(color = "blue") + 
+  filter(fecha >= "2010-01-01" & fecha <= "2020-01-01") |>
+  mutate(
+    diciembre = lubridate::month(fecha) == 12,
+    estacionalidad = ifelse(diciembre, fecha, NA),
+    estacionalidad = as.Date(estacionalidad)) |> 
+  ggplot() + 
+  geom_line(aes(x = fecha, y = indice_original), color = "blue") +
+  scale_x_date(labels = scales::date_format("%b %y"), date_breaks = "2 year") + 
   labs(title = "Índice Mensual de Actividad Económica",
-       subtitle = "República Dominicana",
-       x = "Periodo", y = "Índice Original", 
-       caption = "Fuente: BCRD")
+       subtitle = "República Dominicana 2010 - 2020",
+       x = "Periodo", y = "Índice Original",
+       caption = "Fuente: BCRD") + 
+  theme_minimal() +
+  theme(text = element_text(size = 7))
+
+plot_imae + 
+  geom_text(aes(estacionalidad, indice_original, label = "Dic"), vjust = -0.5, hjust = 0.5, color = "darkred", size = 1.5)
 
 ```
 
@@ -66,38 +138,64 @@ imae |>
 
 La tendencia se refiere a la dirección general en la que se mueve una serie de tiempo. Por ejemplo, el PIB tiende a crecer a lo largo del tiempo.
 
-## Ciclos
+```{r}
+plot_imae + 
+  geom_segment(
+      x = 15614, y = 110,
+      xend = 18231, yend = 165,
+      arrow = arrow(), color = "darkred",
+      size = 0.2
+  )
+```
 
-Los ciclos se refieren a fluctuaciones que se repiten en un periodo de tiempo mayor al de la estacionalidad. Por ejemplo, el ciclo económico.
+## Aleatoriedad
 
-## Ruido
+Puede denominarse al término de **aleatorio** a todos aquellos movimientos no observados en la serie, que no presentan patrón alguno dentro de la estacionalidad ni tendencia. Estos movimientos se le atribuyen generalmente a variaciones no previstas.
 
-El ruido se refiere a las fluctuaciones aleatorias que no pueden ser explicadas por la estacionalidad, la tendencia o los ciclos.
+```{r}
+imae_original <- imae |> 
+  select(fecha, indice_original)
 
-### Ejemplos de una serie de tiempo
-
--   PIB
--   Inflación
--   Tipo de cambio
--   Precios de acciones
--   Precios de bonos
-
-## Análisis exploratorio de series de tiempo
-
-Gráficos de series de tiempo
-
-```{r, fig.align='center', fig.width=4, fig.height=2.5}
-plot_imae <- imae |>
-  ggplot(aes(x = fecha, y = indice_original)) +
-  geom_line(color = "blue") +
+imae_original |>
+  filter(fecha >= "2010-01-01" & fecha <= "2020-01-01") |>
+  mutate(aleatorio = resid(lm(indice_original ~ fecha))) |> 
+  ggplot() + 
+  geom_line(aes(x = fecha, y = aleatorio), color = "blue") +
+  scale_x_date(labels = scales::date_format("%b %y"), date_breaks = "2 year") + 
   labs(title = "Índice Mensual de Actividad Económica",
-       subtitle = "República Dominicana",
-       x = "Periodo", y = "", 
-       caption = "Fuente: BCRD") +
-  scale_x_date(labels = scales::date_format("%b %y"), date_breaks = "3 year") + 
+       subtitle = "República Dominicana 2010 - 2020",
+       x = "Periodo", y = "Índice Original",
+       caption = "Fuente: BCRD") + 
   theme_minimal() +
-  theme(text = element_text(size = 8))
-
-plot_imae
+  theme(text = element_text(size = 7))
 
 ```
+
+## Observación
+
+La observación en una serie de tiempo se compone de elementos estacionales y de tendencia, junto con términos de error. Esta definición refleja la presencia de patrones estacionales y direcciones de cambio a lo largo del tiempo, así como la inevitable incertidumbre introducida por los términos de error (Chatfield, 2004).
+
+```{=tex}
+\begin{equation}
+    x_t = m_t + s_t + \epsilon_t
+\end{equation}
+```
+```{=tex}
+\begin{equation}
+    x_t = m_t * s_t * \epsilon_t
+\end{equation}
+```
+```{=tex}
+\begin{block}{Nota}
+    Existen dos metodos de descomposición de series de tiempo:
+    
+    1. Aditivo (más común)
+    
+    2. Multiplicativo (cuando la variabilidad de la serie aumenta con el tiempo)
+    
+\end{block}
+```
+## Referencias
+
+-   Chatfield, C. (2003). The Analysis of Time Series: An Introduction.
+-   Wooldridge, J. M. (2010). Introducción a la econometría: un enfoque moderno.
