@@ -4,27 +4,35 @@ subtitle: "Series de tiempo y sus componentes"
 author:
   - "UASD"
   - "ASOECO"
-
-date: "Econ. José Burgos"
+date: "José Ant. Burgos"
 output:
   beamer_presentation:
     theme: "Boadilla"
     colortheme: "whale"
     fonttheme: "professionalfonts"
     slide_level: 2
+    fig_caption: TRUE 
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.align = 'center', fig.width = 3, fig.height = 2 )
 
 library(readxl)
-library(tidyverse)
-library(ggthemes)
 library(fpp3)
 # Cargar datos
 imae <- read_excel("../Recursos/datos/imae_ready.xlsx") |> 
   mutate(fecha = as.Date(fecha))
 ```
+
+## Agradecimientos
+
+-   Asociación de Estudiantes de Economía (ASOECO) por la oportunidad de compartir conocimientos.
+
+-   Escuela de Economía por la formación académica.
+
+![Escuela de Economía](economia.png){width="20%"} \hfill ![ASOECO](asoeco.jpg){width="20%"}
+
+# Series de tiempo
 
 ## Series de tiempo
 
@@ -194,7 +202,77 @@ La observación en una serie de tiempo se compone de elementos estacionales y de
     2. Multiplicativo (cuando la variabilidad de la serie aumenta con el tiempo)
 \end{block} 
 ```
+# Análisis de una serie de tiempo
+
+## Análisis de una serie de tiempo
+
+El análisis de una serie de tiempo se compone de dos partes:
+
+1.  Descomposición de la serie de tiempo.
+
+2.  Análisis de los componentes.
+
+## Descomposición de series de tiempo
+
+La descomposición de una serie de tiempo consiste en separar la serie en sus componentes: estacionalidad ($m_t$), tendencia ($s_t$) y aleatoriedad($\epsilon_t$).
+
+### Descomposición aditiva
+
+```{=tex}
+\begin{equation}
+    x_t = m_t + s_t + \epsilon_t
+\end{equation}
+```
+## Descomposición STL
+
+`STL` es un método versátil y robusto para descomponer series temporales. `STL` es un acrónimo de "descomposición estacional y de tendencias utilizando Loess", mientras que loess es un método para estimar relaciones no lineales. El método `STL` fue desarrollado por RB Cleveland et al. (\textcolor{red}{1990}).
+
+```{=tex}
+\begin{block}{Nota}
+    El método \texttt{STL} es el más utilizado para descomponer series de tiempo.
+\end{block}
+```
+# Rstudio
+
+## Recomendaciones para el uso de Rstudio
+
+1.  Trabajar en proyectos es mucho más eficiente. ![](proyecto-R.png){width="10%"}
+
+2.  Utilizar atajos de teclado (\textcolor{red}{`ctrl + enter | 1 | 2`}).
+
+3.  La organización en los `scripts` es importante.
+
+4.  Nombre de los objetos y funciones descriptivos.
+
+```{r, eval=FALSE, echo=TRUE}
+notas_examen <- c(90, 80, 70, 60, 50)
+pib_real_2010_2020 <- read_excel("pib_real.xlsx")
+```
+
+5.  Utilizar comentarios en los avances del código.
+
+```{r, echo=TRUE, eval=FALSE}
+# Esta función permite leer los datos de la serie de tiempo
+read_data_series <- function(file){
+  read_excel(file)
+}
+```
+
+## Cargar datos y manipularlos
+
+**Paquetes necesarios:**
+
+```{r, echo=TRUE, eval=FALSE}
+library(readxl) # Cargar datos
+library(fpp3) # Descomposición de series de tiempo
+
+# Cargar datos
+imae <- read_excel("Recursos/datos/imae_ready.xlsx") |> 
+  mutate(fecha = as.Date(fecha))
+```
+
 ## Referencias
 
 -   Chatfield, C. (2003). The Analysis of Time Series: An Introduction.
 -   Wooldridge, J. M. (2010). Introducción a la econometría: un enfoque moderno.
+-   Cleveland, RB, Cleveland, WS, McRae, JE y Terpenning, IJ (1990). STL : Procedimiento de descomposición de tendencias estacionales basado en loess. Revista de Estadísticas Oficiales , 6 (1), 3–33.
