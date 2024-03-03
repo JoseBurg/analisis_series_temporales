@@ -7,6 +7,7 @@ author:
 date: "José Ant. Burgos"
 output:
   beamer_presentation:
+    number_sections: FALSE
     theme: "Boadilla"
     colortheme: "whale"
     fonttheme: "professionalfonts"
@@ -244,14 +245,12 @@ La descomposición de una serie de tiempo consiste en separar la serie en sus co
 
 4.  Nombre de los objetos y funciones descriptivos.
 
-```{r, eval=FALSE, echo=TRUE}
-notas_examen <- c(90, 80, 70, 60, 50)
-pib_real_2010_2020 <- read_excel("pib_real.xlsx")
-```
-
 5.  Utilizar comentarios en los avances del código.
 
 ```{r, echo=TRUE, eval=FALSE}
+notas_examen <- c(90, 80, 70, 60, 50)
+pib_real_2010_2020 <- read_excel("pib_real.xlsx")
+
 # Esta función permite leer los datos de la serie de tiempo
 read_data_series <- function(file){
   read_excel(file)
@@ -264,12 +263,41 @@ read_data_series <- function(file){
 
 ```{r, echo=TRUE, eval=FALSE}
 library(readxl) # Cargar datos
-library(fpp3) # Descomposición de series de tiempo
-
+library(fpp3) # Descomposición
 # Cargar datos
-imae <- read_excel("Recursos/datos/imae_ready.xlsx") |> 
+imae <- read_excel(
+  "Recursos/datos/imae_ready.xlsx") |> 
   mutate(fecha = as.Date(fecha))
 ```
+
+## Estrucutra de los datos
+
+```{r, echo=TRUE, fig.align='center', fig.width=3, fig.height=3}
+tail(imae |> select(fecha:indice_original)) |> 
+  kableExtra::kable(format = "latex", booktabs = TRUE)
+```
+
+## Funciones del tidyverse para manipular datos
+
+### Columnas
+
+1.  *select()*: seleccionar.
+
+2.  *mutate()*: crear nuevas columnas.
+
+3.  *group_by()*: agrupar datos.
+
+4.  *summarise()*: resumir por agrupaciones o conjunto de datos.
+
+### Filas
+
+1.  *filter()*: filtrar filas.
+
+2.  *arrange()*: organizar datos.
+
+3.  *distinct()*: valores existente.
+
+4.  *count()*: conteo de observaciones.
 
 ## Referencias
 
