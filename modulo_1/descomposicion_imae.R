@@ -5,7 +5,7 @@ library(readxl)
 # Selecionar los datos de la serie de tiempo
 imae <- read_excel("Recursos/datos/imae_ready.xlsx") |> 
   mutate(fecha = as.Date(fecha)) |> 
-  select(fecha, year, mes,indice_original)
+  select(fecha, year, mes, contains("indice_original"))
 
 # Ver la estructura de los datos
 imae |> 
