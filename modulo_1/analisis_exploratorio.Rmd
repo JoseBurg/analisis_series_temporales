@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.align 
 library(readxl)
 library(fpp3)
 # Cargar datos
-imae <- read_excel("../Recursos/datos/imae_ready.xlsx") |> 
+imae <- read_excel("../recursos/datos/imae.xlsx") |> 
   mutate(fecha = as.Date(fecha))
 ```
 
@@ -56,11 +56,13 @@ T = *Número de observaciones*
 
 -   Tipo de cambio.
 
--   Los indices económicos registrados durante una periodicidad dada:
+-   Los datos económicos registrados durante una periodicidad dada:
+
+    -   IMAE (*Mensual*).
+
+    -   IPC (*Mensual*).
 
     -   PIB (*Trimestral*).
-
-    -   Inflación (*Mensual*).
 
     -   Desempleo (*trimestral*).
 
@@ -207,32 +209,14 @@ La observación en una serie de tiempo se compone de elementos estacionales y de
 
 ## Análisis de una serie de tiempo
 
-El análisis de una serie de tiempo se compone de dos partes:
+El análisis de una serie de tiempo se compone de tres partes:
 
-1.  Descomposición de la serie de tiempo.
+1.  Hacer visualizaciones y conocer algunas medidas estadísticas.
 
-2.  Análisis de los componentes.
+2.  Descomposición.
 
-## Descomposición de series de tiempo
+3.  Análisis de los componentes.
 
-La descomposición de una serie de tiempo consiste en separar la serie en sus componentes: estacionalidad ($m_t$), tendencia ($s_t$) y aleatoriedad($\epsilon_t$).
-
-### Descomposición aditiva
-
-```{=tex}
-\begin{equation}
-    x_t = m_t + s_t + \epsilon_t
-\end{equation}
-```
-## Descomposición STL
-
-`STL` es un método versátil y robusto para descomponer series temporales. `STL` es un acrónimo de "descomposición estacional y de tendencias utilizando Loess", mientras que loess es un método para estimar relaciones no lineales. El método `STL` fue desarrollado por RB Cleveland et al. (\textcolor{red}{1990}).
-
-```{=tex}
-\begin{block}{Nota}
-    El método \texttt{STL} es el más utilizado para descomponer series de tiempo.
-\end{block}
-```
 # Rstudio
 
 ## Recomendaciones para el uso de Rstudio
@@ -251,30 +235,11 @@ La descomposición de una serie de tiempo consiste en separar la serie en sus co
 notas_examen <- c(90, 80, 70, 60, 50)
 pib_real_2010_2020 <- read_excel("pib_real.xlsx")
 
-# Esta función permite leer los datos de la serie de tiempo
+# Esta función permite leer los datos 
+# de la serie de tiempo
 read_data_series <- function(file){
   read_excel(file)
 }
-```
-
-## Cargar datos y manipularlos
-
-**Paquetes necesarios:**
-
-```{r, echo=TRUE, eval=FALSE}
-library(readxl) # Cargar datos
-library(fpp3) # Descomposición
-# Cargar datos
-imae <- read_excel(
-  "Recursos/datos/imae_ready.xlsx") |> 
-  mutate(fecha = as.Date(fecha))
-```
-
-## Estrucutra de los datos
-
-```{r, echo=TRUE, fig.align='center', fig.width=3, fig.height=3}
-tail(imae |> select(fecha:indice_original)) |> 
-  kableExtra::kable(format = "latex", booktabs = TRUE)
 ```
 
 ## Funciones del tidyverse para manipular datos
@@ -299,8 +264,172 @@ tail(imae |> select(fecha:indice_original)) |>
 
 4.  *count()*: conteo de observaciones.
 
+# Analizando los datos
+
+## Cargar datos y manipularlos
+
+**Paquetes necesarios:**
+
+```{r, echo=TRUE, eval=FALSE}
+library(readxl) # Cargar datos
+library(fpp3) # Descomposición
+# Cargar datos
+imae <- read_excel("recursos/datos/imae.xlsx") |> 
+  mutate(fecha = as.Date(fecha))
+```
+
+## Estructura de los datos
+
+```{r, echo=FALSE, fig.align='center', fig.width=3, fig.height=3}
+imae |> 
+  select(fecha:indice_original) |> 
+  tail() |> 
+  kableExtra::kable(format = "latex", booktabs = TRUE)
+```
+
+## Estructura de los datos
+
+```{r, echo=TRUE}
+imae |> 
+  tail(n = 3) |> 
+  glimpse()
+```
+
+## Visualización de los datos
+
+```{r, echo=FALSE, fig.align='center', fig.width=6, fig.height=3.5}
+imae |> 
+  ggplot(aes(x = fecha, y = indice_original)) +
+  geom_line(color = "blue") +
+  labs(title = "IMAE",
+       subtitle = "Índice Mensual de Actividad Económica",
+       x = "Fecha",
+       y = "Índice") +
+  theme_minimal()
+```
+
+## Variaciones mensuales y anuales
+
+```{r, echo=TRUE}
+imae_variacion <- imae |> 
+  rename(indice = indice_original) |>
+  mutate(
+    variacion_mensual = indice - lag(indice),
+    variacion_anual = indice - lag(indice, 12)
+  )
+```
+
+## Visualización de las variaciones
+
+```{r, echo=FALSE, fig.align='center', fig.width=7, fig.height=4}
+imae_variacion |> 
+  pivot_longer(
+    cols = c(variacion_mensual, variacion_anual), 
+    names_to = "variacion", 
+    values_to = "valor") |>
+  ggplot(aes(x = fecha, y = valor, color = variacion)) +
+  geom_line() +
+  labs(title = "Variación del IMAE",
+       x = "Fecha",
+       y = "Variación") +
+  facet_wrap(vars(variacion)) +
+  theme_minimal() + 
+  theme(legend.position = "none")
+```
+
+## Análisis agrupados
+
+```{r, fig.align='center', fig.width=7.5, fig.height=4}
+imae_variacion |> 
+  filter(fecha >= "2010-01-01" & fecha <= "2019-01-01") |> 
+  filter(!is.na(variacion_mensual)) |>
+  mutate(mes = factor(mes, levels = c("Enero", "Febrero", "Marzo", "Abril",
+                                      "Mayo", "Junio", "Julio", "Agosto",
+                                      "Septiembre", "Octubre", "Noviembre",
+                                      "Diciembre"))) |>
+  group_by(mes) |> 
+  summarise(
+    promedio = mean(variacion_mensual, na.rm = TRUE)) |>
+  ggplot(aes(x = mes, y = promedio)) +
+  geom_col(fill = "blue") +
+  labs(subtitle = "Variación mensual promedio",
+       title = "IMAE 2010 - 2019", 
+       x = "Mes",
+       y = "Promedio") +
+  theme_minimal()
+```
+
+# Descomposición de series de tiempo
+
+## Descomposición de series de tiempo
+
+La descomposición de una serie de tiempo consiste en separar la serie en sus componentes: estacionalidad ($m_t$), tendencia ($s_t$) y aleatoriedad($\epsilon_t$).
+
+### Descomposición aditiva
+
+```{=tex}
+\begin{equation}
+    x_t = m_t + s_t + \epsilon_t
+\end{equation}
+```
+## Descomposición STL
+
+`STL` es un método versátil y robusto para descomponer series temporales. `STL` es un acrónimo de "descomposición estacional y de tendencias utilizando Loess", mientras que loess es un método para estimar relaciones no lineales. El método `STL` fue desarrollado por RB Cleveland et al. (\textcolor{red}{1990}).
+
+```{=tex}
+\begin{block}{Nota}
+    El método \texttt{STL} es el más utilizado para descomponer series de tiempo.
+\end{block}
+```
+## Descomposición en `R`
+
+```{r, echo=TRUE}
+imae_ts <- imae |>
+  filter(fecha >= "2010-01-01" & fecha <= "2019-01-01") |>
+  mutate(month_year = yearmonth(fecha)) |> 
+  select(month_year, indice = indice_original) |>
+  as_tsibble(index = month_year) |> 
+  model(
+    STL(indice)
+  )
+```
+
+## Gráfico de la serie descompuesta
+
+```{r, fig.align='center', fig.width=6, fig.height=4}
+components(imae_ts) |> autoplot()
+```
+
+## Datos desestacionalizados
+
+```{r, fig.align='center', fig.width=6, fig.height=3}
+components(imae_ts) |>
+  as_tsibble() |>
+  autoplot(indice, colour="gray50", size = 0.7)+
+  geom_line(aes(y=season_adjust), 
+            colour = "blue", size = 1) +
+  labs(
+    y = "IMAE",
+    title = "Índice Mensual de Actividad Económica",
+    x = "Fecha") +
+  theme_minimal()
+```
+
+## Guardar en excel los datos descompuestos
+
+```{r, echo=TRUE}
+imaes <- components(imae_ts) |>
+  as_tsibble() |>
+  select(-c(.model, season_year, trend)) |>
+  as.data.frame()
+```
+
 ## Referencias
 
 -   Chatfield, C. (2003). The Analysis of Time Series: An Introduction.
+
 -   Wooldridge, J. M. (2010). Introducción a la econometría: un enfoque moderno.
+
 -   Cleveland, RB, Cleveland, WS, McRae, JE y Terpenning, IJ (1990). STL : Procedimiento de descomposición de tendencias estacionales basado en loess. Revista de Estadísticas Oficiales , 6 (1), 3–33.
+
+-   Hyndman, R. J., Athanasopoulos, G. (2018). Forecasting: principles and practice. Monash University, Australia.
