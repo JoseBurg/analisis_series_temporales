@@ -96,7 +96,7 @@ Ejemplos
 
 ## Frecuencia o periodicidad
 
-Frecuencia son la cantidad de veces que se toman las observaciones en un periodo de tiempo. Por ejemplo, el PIB se mide de forma anual, trimestral o mensual.
+Frecuencia son la cantidad de veces que se toman las observaciones en un periodo de tiempo. Por ejemplo, el PIB se mide de forma anual o trimestral.
 
 -   Anual (*PIB, inflación*).
 -   Trimestral (*PIB*).
