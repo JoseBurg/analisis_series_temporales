@@ -25,13 +25,13 @@ imae <- read_excel("../recursos/datos/imae.xlsx") |>
   mutate(fecha = as.Date(fecha))
 ```
 
-## Agradecimientos
+<!-- ## Agradecimientos -->
 
--   Asociación de Estudiantes de Economía (ASOECO) por la oportunidad de compartir conocimientos.
+<!-- -   Asociación de Estudiantes de Economía (ASOECO) por la oportunidad de compartir conocimientos. -->
 
--   Escuela de Economía por la formación académica.
+<!-- -   Escuela de Economía por la formación académica. -->
 
-![Escuela de Economía](economia.png){width="20%"} \hfill ![ASOECO](asoeco.jpg){width="20%"}
+<!-- ![Escuela de Economía](economia.png){width="20%"} \hfill ![ASOECO](asoeco.jpg){width="20%"} -->
 
 # Series de tiempo
 
@@ -394,7 +394,7 @@ imae_ts <- imae |>
   )
 ```
 
-## Gráfico de la serie descompuesta
+## Gráfico de los componentes de la serie
 
 ```{r, fig.align='center', fig.width=6, fig.height=4}
 components(imae_ts) |> autoplot()
@@ -415,13 +415,22 @@ components(imae_ts) |>
   theme_minimal()
 ```
 
-## Guardar en excel los datos descompuestos
+## Guardar en excel los datos en excel
 
-```{r, echo=TRUE}
-imaes <- components(imae_ts) |>
-  as_tsibble() |>
-  select(-c(.model, season_year, trend)) |>
-  as.data.frame()
+```{r, echo=TRUE, eval=FALSE}
+library(openxlsx)
+imae_pivot <- imae_variacion %>% 
+  filter(!is.na(variacion_anual)) %>% 
+  pivot_longer(
+    c(variacion_mensual, variacion_anual), 
+    names_to = "variacion",
+    values_to = "valor")
+
+# Creando archivo de excel
+book <- openxlsx::createWorkbook()
+addWorksheet(book, "imae_dest")
+writeData(book, "imae_dest", imae_pivot)
+openxlsx::saveWorkbook(book, "imae_variacion.xlsx")
 ```
 
 ## Referencias
@@ -432,4 +441,8 @@ imaes <- components(imae_ts) |>
 
 -   Cleveland, RB, Cleveland, WS, McRae, JE y Terpenning, IJ (1990). STL : Procedimiento de descomposición de tendencias estacionales basado en loess. Revista de Estadísticas Oficiales , 6 (1), 3–33.
 
--   Hyndman, R. J., Athanasopoulos, G. (2018). Forecasting: principles and practice. Monash University, Australia.
+-   [Forecasting: principles and practice. Monash University, Australia.](https://otexts.com/fpp3)
+
+-   [R for Data Science](https://r4ds.had.co.nz/)
+
+-   [R para ciencias de datos](https://es.r4ds.hadley.nz/)
